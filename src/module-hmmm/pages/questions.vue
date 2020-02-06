@@ -2,6 +2,12 @@
   <div class="dashboard-container">
     <div class="app-container">
       <el-card class="box-card">
+        <el-row>
+          <el-col>
+            <el-button type="primary" size="mini" @click="$router.push('/questions/new')">新增试题</el-button>
+            <el-button type="danger" size="mini">批量导入</el-button>
+          </el-col>
+        </el-row>
         <!-- :gutter 栅格间隔 给各个col设置间隙,单位是像素 -->
         <el-row :gutter="20">
           <!-- :span 限定每列的宽度,是一个"权"的单位,总宽度是24 -->
@@ -144,7 +150,7 @@
           <el-table-column label="题干" prop="question"></el-table-column>
           <el-table-column label="录入时间" prop="addDate" width="170">
             <!-- 通过插值表达式表现时间信息,并应用过滤器做格式转换
-                 获得当前列的信息: 作用域插槽应用,具体还需要通过row衔接各个字段内容 -->
+            获得当前列的信息: 作用域插槽应用,具体还需要通过row衔接各个字段内容-->
             <span slot-scope="stData">{{stData.row.addDate | parseTimeByString}}</span>
             <!-- 
               span会填充给el-table-column子组件的slot插槽中去
@@ -157,10 +163,18 @@
           <el-table-column :formatter="difficultyFMT" label="难度" prop="difficulty"></el-table-column>
           <el-table-column label="录入人" prop="creator"></el-table-column>
           <el-table-column label="操作" width="200">
-            <a href="#">预览</a>
-            <a href="#">修改</a>
-            <a href="#">删除</a>
-            <a href="#">加入精选</a>
+            <template slot-scope="stData">
+              <a href="#">预览</a>
+              <a href="#">修改</a>
+              <!-- 因为a标签有自己的默认行为,只要单击它,href和click都执行了,而只需要执行click
+                    使用事件修饰符
+                      @click.prevent: 阻止标签的默认行为,只执行事件
+                        prevent: 阻止浏览器默认动作(a和form)
+              @click.native: 使得事件直接作用到组件的html标签上-->
+              <!-- stData.row代表当前整条试题记录对象,把删除的整个记录对象当做参数传递使用 -->
+              <a href="#" @click.prevent="del(stData.row)">删除</a>
+              <a href="#">加入精选</a>
+            </template>
           </el-table-column>
         </el-table>
       </el-card>
@@ -192,8 +206,8 @@ import { simple as usersSimple } from '@/api/base/users.js'
 import { simple as directorysSimple } from '@/api/hmmm/directorys.js'
 // 导入获得城市,区县列表的api方法
 import { provinces, citys } from '@/api/hmmm/citys.js'
-// 导入获得基础题库列表的api方法
-import { list } from '@/api/hmmm/questions.js'
+// 导入获得 基础题库列表,试题数据删除 的api方法
+import { list, remove } from '@/api/hmmm/questions.js'
 
 export default {
   name: 'QuestionsList',
@@ -300,11 +314,11 @@ export default {
     },
 
     // 对 题型 列信息进行二次更新操作
-      // row:代表当前每个数据项纪录信息的,是一个对象  {id:xxx,number:xx,difficulty:xx,addDate:xx……}
-      // --可以通过这个row访问到当前任何数据项目纪录信息,调用形式: row.id row.number
-      // column:可以获取纪录的列的信息,一般不使用
-      // cellValue:当前行当前列的数据项目纪录信息,类似row.questionType的内容
-      // index:代表各个纪录的序号信息,1/2/3/4/5……，一般不使用
+    // row:代表当前每个数据项纪录信息的,是一个对象  {id:xxx,number:xx,difficulty:xx,addDate:xx……}
+    // --可以通过这个row访问到当前任何数据项目纪录信息,调用形式: row.id row.number
+    // column:可以获取纪录的列的信息,一般不使用
+    // cellValue:当前行当前列的数据项目纪录信息,类似row.questionType的内容
+    // index:代表各个纪录的序号信息,1/2/3/4/5……，一般不使用
     questionTypeFMT(row, column, cellValue, index) {
       // 把cellValue对应的"汉字"内容返回显示
       return this.questionTypeList[cellValue - 1].label
@@ -314,6 +328,24 @@ export default {
     difficultyFMT(row, column, cellValue, index) {
       // 把cellValue对应的"汉字"内容返回显示
       return this.difficultyList[cellValue - 1].label
+    },
+
+    // 删除试题数据
+    del(question) {
+      // question:被删除试题的整条记录对象
+      this.$confirm('确认要删除么?', '删除', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(async () => {
+          // async和await保障数据删除完毕(remove执行完毕),再做更新(调用方法)
+          let result = await remove(question)
+          this.$message.success('删除成功')
+          // 刷新数据
+          this.getQuestionList()
+        })
+        .catch(() => {})
     }
   }
 }
