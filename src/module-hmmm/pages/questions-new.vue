@@ -81,27 +81,59 @@
           <el-form-item label="题干：">
             <el-input type="textarea" v-model="addForm.question"></el-input>
           </el-form-item>
-          <el-form-item label="选项：">
+          <el-form-item label="选项：" v-if="allShow">
+            <!-- 单选选项 -->
+            <!-- 单选按钮组是通过singleSelect接收被选中项目 -->
+            <template v-if="radioShow">
             <el-radio v-model="singleSelect" :label="0">
-              A:
-              <el-input type="text" v-model="addForm.options[0]['title']"></el-input>
+              A.
+              <el-input type="text" v-model="addForm.options[0].title"></el-input>
               <!-- 使得各个单选按钮的el-input输入框直接与title成员联系 -->
             </el-radio>
             <br />
             <el-radio v-model="singleSelect" :label="1">
-              B:
-              <el-input type="text" v-model="addForm.options[1]['title']"></el-input>
+              B.
+              <el-input type="text" v-model="addForm.options[1].title"></el-input>
             </el-radio>
             <br />
             <el-radio v-model="singleSelect" :label="2">
-              C:
-              <el-input type="text" v-model="addForm.options[2]['title']"></el-input>
+              C.
+              <el-input type="text" v-model="addForm.options[2].title"></el-input>
             </el-radio>
             <br />
             <el-radio v-model="singleSelect" :label="3">
-              D:
-              <el-input type="text" v-model="addForm.options[3]['title']"></el-input>
+              D.
+              <el-input type="text" v-model="addForm.options[3].title"></el-input>
             </el-radio>
+            </template>
+            <!-- 多选选项 -->
+            <!-- 复选框特点: 同一时间允许选取多个,是独立的
+                        它的v-model可以针对自己的成员进行绑定
+                        若勾选,v-model接收true
+                        若不勾选,v-model接收false -->
+            <!-- 复选框组是直接通过data子成员isRight接收 -->
+            <template v-else>
+              <el-checkbox v-model="addForm.options[0].isRight">
+              A.
+              <el-input type="text" v-model="addForm.options[0].title"></el-input>
+              <!-- 使得各个单选按钮的el-input输入框直接与title成员联系 -->
+            </el-checkbox>
+            <br />
+            <el-checkbox v-model="addForm.options[1].isRight">
+              B.
+              <el-input type="text" v-model="addForm.options[1].title"></el-input>
+            </el-checkbox>
+            <br />
+            <el-checkbox v-model="addForm.options[2].isRight">
+              C.
+              <el-input type="text" v-model="addForm.options[2].title"></el-input>
+            </el-checkbox>
+            <br />
+            <el-checkbox v-model="addForm.options[3].isRight">
+              D.
+              <el-input type="text" v-model="addForm.options[3].title"></el-input>
+            </el-checkbox>
+            </template>
           </el-form-item>
           <el-form-item label="答案：">
             <el-input type="textarea" v-model="addForm.answer"></el-input>
@@ -144,8 +176,9 @@ export default {
       questionTypeList, // 题型(简易成员赋值)
       difficultyList, // 难度(简易成员赋值)
       singleSelect: '', // 感知被选中的项目的值,是中间成员,需要通过watch转变为isRight
-      addForm: {
-        // 添加试题 表单数据对象
+      radioShow: true, // 默认显示单选项目
+      allShow: true, // 单选或多选默认显示一个
+      addForm: { // 添加试题 表单数据对象
         subjectID: '', // 学科
         catalogID: '', // 二级目录
         enterpriseID: '', // 企业
@@ -187,7 +220,23 @@ export default {
       }
       // 2.设置当前选中项目的isRight为true
       this.addForm.options[newV].isRight = true
+    },
+    // 监听题型,进而切换显示选项表单域
+    'addForm.questionType': function(newV) {
+      if (newV === '1') {
+        // 单选
+        this.radioShow = true
+        this.allShow = true
+      } else if (newV === '2') {
+        // 多选
+        this.radioShow = false
+        this.allShow = true
+      } else {
+        // 简答
+        this.allShow = false
+      }
     }
+
   },
   methods: {
     provinces, // 获得城市的方法(简易成员赋值)
