@@ -177,6 +177,19 @@
             </template>
           </el-table-column>
         </el-table>
+        <!-- 试题分页 -->
+          <!-- searchForm.page: 当前页码
+          searchForm.pagesize: 每页显示条数
+          tot: 总记录条数 -->
+        <el-pagination
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+          :current-page="searchForm.page"
+          :page-sizes="[3,5,10,20]"
+          :page-size="searchForm.pagesize"
+          layout="total,sizes,prev,pager,next,jumper"
+          :total="tot"
+        ></el-pagination>
       </el-card>
     </div>
   </div>
@@ -227,6 +240,7 @@ export default {
       directionList, // 方向
       cityList: [], // 区县
       questionList: [], // 基础题库列表
+      tot: 0, // 数据总条数
       searchForm: {
         // 搜索题库的表单数据对象,是要往服务器端提交的
         subjectID: '', // 学科id
@@ -240,7 +254,9 @@ export default {
         shortName: '', // 企业简称
         direction: '', // 方向
         creatorID: '', // 录入人
-        catalogID: '' // 目录
+        catalogID: '', // 目录
+        page: 1, // 默认获取第1页数据
+        pagesize: 3 // 默认每页获得3条数据
       }
     }
   },
@@ -311,6 +327,8 @@ export default {
       // 设置searchForm参数，作为获得试题列表信息的筛选条件
       let result = await list(this.searchForm)
       this.questionList = result.data.items
+      // 获得数据总条数并赋予给tot成员
+      this.tot = result.data.counts
     },
 
     // 对 题型 列信息进行二次更新操作
@@ -346,6 +364,16 @@ export default {
           this.getQuestionList()
         })
         .catch(() => {})
+    },
+    // 每页条数变化回调处理
+    handleSizeChange(val) {
+      // val: 变化后的每页条数
+      // 表单成员接收
+      this.searchForm.pagesize = val
+    },
+    // 当前页码变化的回调处理
+    handleCurrentChange(val) {
+      this.searchForm.page = val
     }
   }
 }
@@ -360,5 +388,8 @@ export default {
 }
 .el-table {
   margin-top: 30px;
+}
+.el-pagination{
+  margin-top: 15px
 }
 </style>
