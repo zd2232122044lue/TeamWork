@@ -1,4 +1,8 @@
 export default {
+  question: {
+    newadd: 'new add',
+    manyadd: 'many add'
+  },
   route: {
     dashboard: 'Dashboard',
     manage: 'manage',

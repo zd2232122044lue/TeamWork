@@ -4,8 +4,8 @@
       <el-card class="box-card">
         <el-row>
           <el-col>
-            <el-button type="primary" size="mini" @click="$router.push('/questions/new')">新增试题</el-button>
-            <el-button type="danger" size="mini">批量导入</el-button>
+            <el-button type="primary" size="mini" @click="$router.push('/questions/new')">{{$t('question.newadd')}}</el-button>
+            <el-button type="danger" size="mini">{{$t('question.manyadd')}}</el-button>
           </el-col>
         </el-row>
         <!-- :gutter 栅格间隔 给各个col设置间隙,单位是像素 -->

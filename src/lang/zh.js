@@ -1,4 +1,8 @@
 export default {
+  question: {
+    newadd: '新增试题',
+    manyadd: '批量导入'
+  },
   route: {
     dashboard: '首页',
     manage: '后台管理',
@@ -89,5 +93,5 @@ export default {
     describe: '描述',
     preserve: '保存',
     signOut: '退出'
-  }
+  } 
 }
